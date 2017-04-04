@@ -6,7 +6,7 @@ import os
 
 class MembershipTesting:
     def __init__(self):
-        
+        """During object construction, all tests are run"""
         addTest = self.addMemberTest()
         if addTest:    
             print("Add Member Testing Passed!")
@@ -32,13 +32,14 @@ class MembershipTesting:
         global test_db
         test_db = True
         test_controller = MemberController()
-        
+        #Tests are conducted using a temporary new database to prevent interference with the normal database
         test_controller.addMember("John","Smith",3,str(datetime.datetime.now())[:10],False)
         test_controller.addMember("Lorem","Ipsum",15,str(datetime.datetime.now())[:10],True)
         test_controller.addMember("First Name","Last Name",999,str(datetime.datetime.now())[:10],False)
         test_controller.addMember("forename","surname",0,str(datetime.datetime.now())[:10],True)
         test_controller.addMember("One","Two",10000,"2016-04-08",True)
 
+        #If searching the details of the added members returns the expected result, the test is successful
         if test_controller.searchMembers("John","Smith",'3','4',str(datetime.datetime.now())[:10],"Basic Members Only")[0] != (1, 'John', 'Smith', 3, str(datetime.datetime.now())[:10], 'BASIC'):
             os.remove('testDB.db')
             print("test 1 failure")
@@ -74,12 +75,14 @@ class MembershipTesting:
         test_controller.addMember("forename","surname",0,str(datetime.datetime.now())[:10],True)
         test_controller.addMember("One","Two",10000,"2016-04-08",True)
 
+        #Member IDs can be safely assumed in this test environment
         test_controller.deleteMember(1)
         test_controller.deleteMember(2)
         test_controller.deleteMember(3)
         test_controller.deleteMember(4)
         test_controller.deleteMember(5)
 
+        #If searching for the member returns a result, the deletion was not successful
         if len(test_controller.searchMembers("John","Smith",'3','4',str(datetime.datetime.now())[:10],"Basic Members Only"))>0:
             os.remove('testDB.db')
             print("test 1 failure")
@@ -121,6 +124,7 @@ class MembershipTesting:
         test_controller.upgradeMember(4)
         test_controller.upgradeMember(5)
 
+        #By searching restricted to loyal members only, this can be used to show if the member was upgraded
         if len(test_controller.searchMembers("John","Smith",'13','14',str(datetime.datetime.now())[:10],"Loyal Members Only"))==0:
             os.remove('testDB.db')
             print("test 1 failure")
@@ -215,6 +219,7 @@ class MembershipUserInterface:
         self.main_root_window.mainloop()
 
     def mainAddMemberCallback(self):
+        #Other sections of the interface are loaded by destroying the current one and initialising the new one
         self.main_root_window.destroy()
         self.addLoop()
     def mainDeleteMemberCallback(self):
@@ -288,11 +293,16 @@ class MembershipUserInterface:
         self.add_root_window.mainloop()
 
     def addSubmitCallback(self):
+        #StringVars have to be specifically retrieved
         self.input_first_name = self.add_first_name.get()
         self.input_last_name = self.add_last_name.get()
+
+        #Input fields are text by default, this requires conversion
         self.input_sessions_booked = int(self.add_sessions_booked.get())
         self.getDate()
         self.input_is_loyal = self.add_is_loyal.get()
+
+        #A controller is specifically constructed to add a member
         member_controller = MemberController()
         member_controller.addMember(self.input_first_name, self.input_last_name, self.input_sessions_booked, self.input_date_joined, self.input_is_loyal)
         
@@ -426,9 +436,11 @@ class MembershipUserInterface:
         self.searchdelete_tree.heading("Date Joined",text="Date Joined")
         self.searchdelete_tree.heading("Member Type",text="Member Type")
 
+        #The selected item is updated upon mouse release, this ensures the currently selected item is actually stored
         self.searchdelete_tree.bind('<ButtonRelease-1>', self.searchdeleteSelection)
 
         for row in results:
+            #The results are already in the same format needed for the tree
             self.searchdelete_tree.insert("",0,values=row)
 
         self.searchdelete_tree.pack()
@@ -446,14 +458,17 @@ class MembershipUserInterface:
         self.searchdelete_root_window.mainloop()
 
     def searchdeleteSelection(self,arg):
+        #Update selection
         self.searchdelete_selection = self.searchdelete_tree.item(self.searchdelete_tree.focus())
 
     def searchdeleteSubmitCallback(self):
+        #Values 1 and 2 correspond to the member name
         member_name = self.searchdelete_selection["values"][1] + " " + self.searchdelete_selection["values"][2]
+        #A prompt is used to prevent accidental deletion
         answer = messagebox.askquestion("Delete Member","Are you sure you want to delete " + member_name + " from the database?", icon='warning')
         if answer == "yes":
             member_controller = MemberController()
-            member_controller.deleteMember(self.searchdelete_selection["values"][0])
+            member_controller.deleteMember(self.searchdelete_selection["values"][0]) #Value 0 is the member ID, so no additional information is needed
             messagebox.showinfo("Deletion Successful",member_name + " has been successfully deleted from the database.")
             self.searchdelete_root_window.destroy()
             self.deleteSearchCallback()
@@ -535,6 +550,7 @@ class MembershipUserInterface:
         self.input_sessions_booked_min = self.upgrade_sessions_booked_min.get()
         self.input_sessions_booked_max = self.upgrade_sessions_booked_max.get()
 
+        #Filtering is necessary to ensure members who have not booked for at least 10 sessions are not accessible by the upgrade menu
         if len(self.input_sessions_booked_min) == 0:
             self.input_sessions_booked_min = "10"
 
@@ -633,14 +649,16 @@ class MemberController:
     def __init__(self):
         pass
     def addMember(self, first_name, last_name, sessions_booked, date_joined, is_loyal):
+        #MemberFactory handles member construction separately
         member_factory = MemberFactory(first_name, last_name, sessions_booked, date_joined, is_loyal)
         return member_factory.getMember()
     def searchMembers(self, first_name, last_name, sessions_booked_min, sessions_booked_max, date_joined, is_loyal):
+        #A generic data access class is necessary when we are not sure which member types will be returned
         member_impl = GenericMemberImpl()
         if len(first_name) == 0:
             first_name = ''
         else:
-            first_name = "first_name = '" + first_name + "' AND"
+            first_name = "first_name = '" + first_name + "' AND" #Portions of the query are only added if values were specified for them
 
         if len(last_name) == 0:
             last_name = ''
@@ -657,7 +675,7 @@ class MemberController:
         else:
             sessions_booked_min = int(sessions_booked_min)
 
-        if is_loyal == "All Member Types":
+        if is_loyal == "All Member Types": #The dropdown box values are translated to member types
             is_loyal = ""
         if is_loyal == "Basic Members Only":
             is_loyal = "member_type = 'BASIC' AND"
@@ -724,6 +742,7 @@ class Member:
 
 class BasicMember(Member):
     def saveData(self):
+        #Each member type uses their own data access methods
         basic_member_impl = BasicMemberImpl([self])
         basic_member_impl.writeAll()
 
@@ -735,6 +754,8 @@ class LoyalMember(Member):
 class BasicMemberImpl:
     def __init__(self, members):
         self.members = members
+
+        #Check if this is a unit test, if so, use a temporary test database
         global test_db
         db_exists = False
         self.db_name = 'MemberDB.db'
@@ -748,17 +769,10 @@ class BasicMemberImpl:
 
         if not db_exists:
             self.sql_cursor.execute("CREATE TABLE Members(id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, sessions_booked INTEGER NOT NULL, date_joined TEXT NOT NULL, member_type TEXT DEFAULT BASIC);")
-
-    def readAll(self):
-        for member in self.members:
-            self.readMember(member.first_name,member.last_name,member.sessions_booked,member.date_joined)
     
     def writeAll(self):
         for member in self.members:
             self.writeMember(member.first_name,member.last_name,member.sessions_booked,member.date_joined)
-    
-    def readMember(self, first_name = "*", last_name = "*", sessions_booked = "*", date_joined = "*"):
-        return self.sql_cursor.execute("SELECT * FROM Members WHERE first_name = %s AND last_name = %s AND sessions_booked = %d AND date_joined = %s" % (first_name,last_name,sessions_booked,date_joined))
     
     def writeMember(self, first_name, last_name, sessions_booked, date_joined):
         self.sql_cursor.execute("INSERT INTO Members (first_name,last_name,sessions_booked,date_joined) VALUES ('%s','%s',%d,'%s')" % (first_name,last_name,sessions_booked,date_joined))
@@ -781,17 +795,10 @@ class LoyalMemberImpl:
         if not db_exists:
             self.sql_cursor.execute("CREATE TABLE Members(id INTEGER PRIMARY KEY AUTOINCREMENT, first_name TEXT NOT NULL, last_name TEXT NOT NULL, sessions_booked INTEGER NOT NULL, date_joined TEXT NOT NULL, member_type TEXT DEFAULT BASIC);")
 
-    def readAll(self):
-        for member in self.members:
-            self.readMember(member.first_name,member.last_name,member.sessions_booked,member.date_joined)
-    
     def writeAll(self):
         for member in self.members:
             self.writeMember(member.first_name,member.last_name,member.sessions_booked,member.date_joined)
-    
-    def readMember(self, first_name = "*", last_name = "*", sessions_booked = "*", date_joined = "*"):
-        return self.sql_cursor.execute("SELECT * FROM Members WHERE first_name = %s AND last_name = %s AND sessions_booked = %d AND date_joined = %s" % (first_name,last_name,sessions_booked,date_joined))
-    
+
     def writeMember(self, first_name, last_name, sessions_booked, date_joined):
         self.sql_cursor.execute("INSERT INTO Members (first_name,last_name,sessions_booked,date_joined,member_type) VALUES ('%s','%s',%d,'%s','LOYAL')" % (first_name,last_name,sessions_booked,date_joined))
         self.db_connection.commit()
@@ -824,8 +831,11 @@ class GenericMemberImpl:
         self.sql_cursor.execute("UPDATE Members SET member_type = 'LOYAL' WHERE id = %d" % (member_id))
         self.db_connection.commit()
     
-#testing
-test = MembershipTesting()
+if __name__ == "__main__":
+    main_win = MembershipUserInterface()
+else:
+    #testing
+    test = MembershipTesting()
 
-#debug
-dbg_win = MembershipUserInterface()
+    #debug
+    dbg_win = MembershipUserInterface()
