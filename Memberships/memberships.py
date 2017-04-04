@@ -148,7 +148,6 @@ class MembershipUserInterface:
         self.input_sessions_booked = int(self.add_sessions_booked.get())
         self.getDate()
         self.input_is_loyal = self.add_is_loyal.get()
-        print(self.input_first_name, self.input_last_name, self.input_sessions_booked, self.input_date_joined, self.input_is_loyal)
         member_controller = MemberController()
         member_controller.addMember(self.input_first_name, self.input_last_name, self.input_sessions_booked, self.input_date_joined, self.input_is_loyal)
         
@@ -416,7 +415,6 @@ class MembershipUserInterface:
         self.mainLoop()
 
     def searchupgradeLoop(self,results):
-        print(results)
         #root initialisation
         self.searchupgrade_root_window = Tk()
         self.searchupgrade_root_window.title("The Sphere: Upgrade Member")
