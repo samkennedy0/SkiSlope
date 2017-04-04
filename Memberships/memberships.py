@@ -4,10 +4,155 @@ import datetime
 import sqlite3
 import os
 
+class MembershipTesting:
+    def __init__(self):
+        
+        addTest = self.addMemberTest()
+        if addTest:    
+            print("Add Member Testing Passed!")
+        else:
+            print("Add Member Testing Failed")
+            
+        deleteTest = self.deleteMemberTest()
+        if deleteTest:
+            print("Delete Member Testing Passed!")
+        else:
+            print("Delete Member Testing Failed")
+
+        upgradeTest = self.upgradeMemberTest()
+        if upgradeTest:
+            print("Upgrade Member Testing Passed!")
+        else:
+            print("Upgrade Member Testing Failed")
+
+        if addTest and deleteTest and upgradeTest:
+            print("All tests successful!")
+            
+    def addMemberTest(self):
+        global test_db
+        test_db = True
+        test_controller = MemberController()
+        
+        test_controller.addMember("John","Smith",3,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("Lorem","Ipsum",15,str(datetime.datetime.now())[:10],True)
+        test_controller.addMember("First Name","Last Name",999,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("forename","surname",0,str(datetime.datetime.now())[:10],True)
+        test_controller.addMember("One","Two",10000,"2016-04-08",True)
+
+        if test_controller.searchMembers("John","Smith",'3','4',str(datetime.datetime.now())[:10],"Basic Members Only")[0] != (1, 'John', 'Smith', 3, str(datetime.datetime.now())[:10], 'BASIC'):
+            os.remove('testDB.db')
+            print("test 1 failure")
+            return False
+        if test_controller.searchMembers("Lorem","Ipsum",'15','16',str(datetime.datetime.now())[:10],"Loyal Members Only")[0] != (2, 'Lorem', 'Ipsum', 15, str(datetime.datetime.now())[:10], 'LOYAL'):
+            os.remove('testDB.db')
+            print("test 2 failure")
+            return False
+        if test_controller.searchMembers("First Name","Last Name",'999','1000',str(datetime.datetime.now())[:10],"Basic Members Only")[0] != (3, 'First Name', 'Last Name', 999, str(datetime.datetime.now())[:10], 'BASIC'):
+            os.remove('testDB.db')
+            print("test 3 failure")
+            return False
+        if test_controller.searchMembers("forename","surname",'0','1',str(datetime.datetime.now())[:10],"Loyal Members Only")[0] != (4, 'forename', 'surname', 0, str(datetime.datetime.now())[:10], 'LOYAL'):
+            os.remove('testDB.db')
+            print("test 4 failure")
+            return False
+        if test_controller.searchMembers("One","Two",'10000','10001',"2016-04-08","Loyal Members Only")[0] != (5, 'One', 'Two', 10000, "2016-04-08", 'LOYAL'):
+            os.remove('testDB.db')
+            print("test 5 failure")
+            return False
+        
+        os.remove('testDB.db')
+        return True
+
+    def deleteMemberTest(self):
+        global test_db
+        test_db = True
+        test_controller = MemberController()
+        
+        test_controller.addMember("John","Smith",3,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("Lorem","Ipsum",15,str(datetime.datetime.now())[:10],True)
+        test_controller.addMember("First Name","Last Name",999,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("forename","surname",0,str(datetime.datetime.now())[:10],True)
+        test_controller.addMember("One","Two",10000,"2016-04-08",True)
+
+        test_controller.deleteMember(1)
+        test_controller.deleteMember(2)
+        test_controller.deleteMember(3)
+        test_controller.deleteMember(4)
+        test_controller.deleteMember(5)
+
+        if len(test_controller.searchMembers("John","Smith",'3','4',str(datetime.datetime.now())[:10],"Basic Members Only"))>0:
+            os.remove('testDB.db')
+            print("test 1 failure")
+            return False
+        if len(test_controller.searchMembers("Lorem","Ipsum",'15','16',str(datetime.datetime.now())[:10],"Loyal Members Only"))>0:
+            os.remove('testDB.db')
+            print("test 2 failure")
+            return False
+        if len(test_controller.searchMembers("First Name","Last Name",'999','1000',str(datetime.datetime.now())[:10],"Basic Members Only"))>0:
+            os.remove('testDB.db')
+            print("test 3 failure")
+            return False
+        if len(test_controller.searchMembers("forename","surname",'0','1',str(datetime.datetime.now())[:10],"Loyal Members Only"))>0:
+            os.remove('testDB.db')
+            print("test 4 failure")
+            return False
+        if len(test_controller.searchMembers("One","Two",'10000','10001',"2016-04-08","Loyal Members Only"))>0:
+            os.remove('testDB.db')
+            print("test 5 failure")
+            return False
+        
+        os.remove('testDB.db')
+        return True
+
+    def upgradeMemberTest(self):
+        global test_db
+        test_db = True
+        test_controller = MemberController()
+        
+        test_controller.addMember("John","Smith",13,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("Lorem","Ipsum",15,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("First Name","Last Name",999,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("forename","surname",10,str(datetime.datetime.now())[:10],False)
+        test_controller.addMember("One","Two",10000,"2016-04-08",False)
+
+        test_controller.upgradeMember(1)
+        test_controller.upgradeMember(2)
+        test_controller.upgradeMember(3)
+        test_controller.upgradeMember(4)
+        test_controller.upgradeMember(5)
+
+        if len(test_controller.searchMembers("John","Smith",'13','14',str(datetime.datetime.now())[:10],"Loyal Members Only"))==0:
+            os.remove('testDB.db')
+            print("test 1 failure")
+            return False
+        if len(test_controller.searchMembers("Lorem","Ipsum",'15','16',str(datetime.datetime.now())[:10],"Loyal Members Only"))==0:
+            os.remove('testDB.db')
+            print("test 2 failure")
+            return False
+        if len(test_controller.searchMembers("First Name","Last Name",'999','1000',str(datetime.datetime.now())[:10],"Loyal Members Only"))==0:
+            os.remove('testDB.db')
+            print("test 3 failure")
+            return False
+        if len(test_controller.searchMembers("forename","surname",'10','11',str(datetime.datetime.now())[:10],"Loyal Members Only"))==0:
+            os.remove('testDB.db')
+            print("test 4 failure")
+            return False
+        if len(test_controller.searchMembers("One","Two",'10000','10001',"2016-04-08","Loyal Members Only"))==0:
+            os.remove('testDB.db')
+            print("test 5 failure")
+            return False
+        
+        os.remove('testDB.db')
+        return True
+
+        
+
 class MembershipUserInterface:
     
     def __init__(self):
         #for consistency, store field values as attributes
+        global test_db
+        test_db = False
         self.input_first_name = ""
         self.input_last_name = ""
         self.input_sessions_booked = 0
@@ -248,7 +393,6 @@ class MembershipUserInterface:
         self.mainLoop()
 
     def searchdeleteLoop(self,results):
-        print(results)
         #root initialisation
         self.searchdelete_root_window = Tk()
         self.searchdelete_root_window.title("The Sphere: Delete Member")
@@ -591,9 +735,11 @@ class LoyalMember(Member):
 class BasicMemberImpl:
     def __init__(self, members):
         self.members = members
-        self.db_name = 'MemberDB.db'
+        global test_db
         db_exists = False
-
+        self.db_name = 'MemberDB.db'
+        if test_db:
+            self.db_name = 'testDB.db'
         if os.path.isfile(self.db_name):
             db_exists = True
 
@@ -621,9 +767,11 @@ class BasicMemberImpl:
 class LoyalMemberImpl:
     def __init__(self, members):
         self.members = members
-        self.db_name = 'MemberDB.db'
+        global test_db
         db_exists = False
-
+        self.db_name = 'MemberDB.db'
+        if test_db:
+            self.db_name = 'testDB.db'
         if os.path.isfile(self.db_name):
             db_exists = True
 
@@ -650,7 +798,10 @@ class LoyalMemberImpl:
         
 class GenericMemberImpl:
     def __init__(self):
+        global test_db
         self.db_name = 'MemberDB.db'
+        if test_db:
+            self.db_name = 'testDB.db'
         db_exists = False
 
         if os.path.isfile(self.db_name):
@@ -673,5 +824,8 @@ class GenericMemberImpl:
         self.sql_cursor.execute("UPDATE Members SET member_type = 'LOYAL' WHERE id = %d" % (member_id))
         self.db_connection.commit()
     
+#testing
+test = MembershipTesting()
+
 #debug
 dbg_win = MembershipUserInterface()
