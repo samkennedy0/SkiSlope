@@ -75,12 +75,6 @@ class customerUserInterface:
       testBoolean = False
 
       #Initial setting of variables in this class.
-      self.Firstname = ""
-      self.Surname = ""
-      self.MembershipId = 0
-      self.SessionId = 0
-
-      #Sets the main font throughout the program interface, limiting the amount of repetition
       self.mainFont = ("Arial", 12)
 
       #calls the UI function
@@ -243,21 +237,25 @@ class Customer:
 
    def getSurname(self):
       return self.Surname
+   
    def setSurname(self, Surname):
       self.Surname = Surname
 
    def getFirstname(self):
       return self.Firstname
+
    def setFirstname(self, Firstname):
       self.Firstname = Firstname
 
    def getMembershipId(self):
       return self.MembershipId
+
    def setMembershipId(self, MembershipId):
       self.MembershipId = MembershipId
 
    def getSessionId(self):
       return self.SessionId
+
    def setSessionId(self, SessionId):
       self.SessionId = SessionId
 
